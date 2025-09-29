@@ -9,7 +9,6 @@ import {
   TbShare3,
 } from "react-icons/tb";
 import { useCallback } from "react";
-import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toast } from "react-toastify";
 
 const buttonStyle = {
@@ -71,14 +70,33 @@ any) => {
             <TbInfoCircleFilled />
           </button>
         ) : null}
-        <CopyToClipboard
-          text={[window.location.href, "shared=true"].join("&")}
-          onCopy={() => toast("Copied to clipboard!")}
+        <button
+          id="share"
+          style={buttonStyle}
+          onClick={async () => {
+            const shareText = [window.location.href, "shared=true"].join("&");
+            try {
+              await navigator.clipboard.writeText(shareText);
+              toast("Copied to clipboard!");
+            } catch {
+              // Fallback for environments without clipboard permission
+              const textarea = document.createElement("textarea");
+              textarea.value = shareText;
+              textarea.style.position = "fixed";
+              textarea.style.left = "-9999px";
+              document.body.appendChild(textarea);
+              textarea.select();
+              try {
+                document.execCommand("copy");
+                toast("Copied to clipboard!");
+              } finally {
+                document.body.removeChild(textarea);
+              }
+            }
+          }}
         >
-          <button id="share" style={buttonStyle}>
-            <TbShare3 />
-          </button>
-        </CopyToClipboard>
+          <TbShare3 />
+        </button>
       </Fragment>
     );
   }, [
